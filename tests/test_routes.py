@@ -22,7 +22,7 @@ Test cases can be run with the following:
   codecov --token=$CODECOV_TOKEN
 
   While debugging just these tests it's convenient to use this:
-    nosetests --stop tests/test_service.py:TestProductService
+    nosetests --stop tests/test_routes.py:TestProductRoutes
 """
 import os
 import logging
@@ -117,8 +117,6 @@ class TestProductRoutes(TestCase):
         logging.debug("Test Product: %s", test_product.serialize())
         response = self.client.post(BASE_URL, json=test_product.serialize())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-        # Make sure location header is set
         location = response.headers.get("Location", None)
         self.assertIsNotNone(location)
 
@@ -163,9 +161,35 @@ class TestProductRoutes(TestCase):
         response = self.client.post(BASE_URL, data={}, content_type="plain/text")
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
-    #
-    # ADD YOUR TEST CASES HERE
-    #
+    def test_get_product(self):
+        """It should get a single product"""
+
+        # create a product
+        product = self._create_products(1)[0]
+
+        # get the product
+        response = self.client.get(f"{BASE_URL}/{product.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        payload = response.get_json()
+        self.assertEqual(payload["name"], product.name)
+
+    def test_get_product_not_found(self):
+        """It should not Get a Product thats not found"""
+        # get the product
+        response = self.client.get(f"{BASE_URL}/{100}")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_product(self):
+        """It should Update a existing Product"""
+        
+        product = self._create_products(1)[0]
+        product.description = "This is an updated test description."
+
+        response = self.client.put(f"{BASE_URL}/{product.id}", json=product.serialize())
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        payload = response.get_json()
+        self.assertEqual(payload["description"], product.description)
+
 
     ######################################################################
     # Utility functions
@@ -178,3 +202,5 @@ class TestProductRoutes(TestCase):
         data = response.get_json()
         # logging.debug("data = %s", data)
         return len(data)
+
+

@@ -27,7 +27,7 @@ import os
 import logging
 import unittest
 from decimal import Decimal
-from service.models import Product, Category, db
+from service.models import Product, Category, db, DataValidationError
 from service import app
 from tests.factories import ProductFactory
 
@@ -139,9 +139,18 @@ class TestProductModel(unittest.TestCase):
         for attr in vars(all_products[0]):
             self.assertEqual(getattr(all_products[0], attr), getattr(product, attr))
 
+    def test_update_empty_id(self):
+        """It should not update a Product with empty id"""
+        # Create a fake product
+        product = ProductFactory()
+        product.id = None
+        product.create()
+        self.assertIsNotNone(product.id)
+        product.id = None
+        self.assertRaises(DataValidationError, product.update)
+
     def test_delete_a_product(self):
         """It should delete a Product"""
-
         # Create a fake product
         product = ProductFactory()
         product.id = None
@@ -223,6 +232,16 @@ class TestProductModel(unittest.TestCase):
         for product in found:
             self.assertEqual(product.category, category)
 
+    def test_find_by_price(self):
+        """It should Find Products by Price"""
+        products = ProductFactory.create_batch(5)
+        for product in products:
+            product.create()
+        price = products[0].price
+        found_products = Product.find_by_price(price)
+        for attr in vars(products[0]):
+            self.assertEqual(getattr(found_products[0], attr), getattr(products[0], attr))
+
     def test_serialize(self):
         """It should serialize a Product into a dict"""
         # Create a fake product
@@ -236,11 +255,23 @@ class TestProductModel(unittest.TestCase):
 
         # Check dict vs product
         for key, values in product_dict.items():
-            
-            attr =  getattr(product, key)
+            attr = getattr(product, key)
             if key == "price":
                 attr = str(attr)
             if key == "category":
                 attr = product.category.name
-            
-            self.assertEqual(product_dict[key],attr)  
+
+            self.assertEqual(product_dict[key], attr)
+
+    def test_deserialize_available(self):
+        """It should not deserialize if available is not bool"""
+
+        product_dict = dict(name="Fedora",
+                            description="A red hat",
+                            price=12.50,
+                            available="true",
+                            category=Category.CLOTHS)
+
+        prodcut = Product()
+        with self.assertRaises(DataValidationError):
+            prodcut.deserialize(product_dict)
