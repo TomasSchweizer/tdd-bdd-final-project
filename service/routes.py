@@ -166,7 +166,7 @@ def update_product(product_id):
               description=f"Product with id: {product_id} doesn't exist.")
     data = request.get_json()
     app.logger.info("Processing: %s", data)
-    product = Product()
+    product = Product.find(product_id)
     product.deserialize(data)
     product.id = product_id
     product.update()
