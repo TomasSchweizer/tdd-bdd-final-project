@@ -106,3 +106,6 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# Images
+home_page.png

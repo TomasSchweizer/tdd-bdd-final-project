@@ -178,7 +178,7 @@ class TestProductRoutes(TestCase):
 
     def test_update_product(self):
         """It should Update a existing Product"""
-        
+
         product = self._create_products(1)[0]
         product.description = "This is an updated test description."
 
@@ -187,7 +187,6 @@ class TestProductRoutes(TestCase):
         payload = response.get_json()
         self.assertEqual(payload["description"], product.description)
 
-    
     def test_update_product_not_found(self):
         """It should not Update a Product thats not found"""
         # get the product
@@ -195,7 +194,6 @@ class TestProductRoutes(TestCase):
 
         response = self.client.put(f"{BASE_URL}/{product.id}", json=product.serialize())
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
 
     def test_delete_product(self):
         """It should Delete an existing Product"""
@@ -254,11 +252,11 @@ class TestProductRoutes(TestCase):
         for product in data:
             self.assertEqual(product["category"], test_product.category.name)
 
-    def test_list_by_name(self):
+    def test_list_by_availability(self):
         """It should Query Products by availability"""
 
         products = self._create_products(10)
-        avail_count = len([product for product in products if product.available == True])
+        avail_count = len([product for product in products if product.available])
         response = self.client.get(BASE_URL, query_string="available=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
@@ -278,5 +276,3 @@ class TestProductRoutes(TestCase):
         data = response.get_json()
         # logging.debug("data = %s", data)
         return len(data)
-
-

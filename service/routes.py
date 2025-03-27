@@ -103,7 +103,7 @@ def list_products():
     category = request.args.get("category", None)
     available = request.args.get("available", None)
 
-    if name: 
+    if name:
         app.logger.info(f"Find by name: {name}")
         products = Product.find_by_name(name)
     elif category:
@@ -115,7 +115,7 @@ def list_products():
         available_value = available.lower() in ["true", "yes", "1"]
         products = Product.find_by_availability(available_value)
     else:
-        app.logger.info(f"Find all")
+        app.logger.info("Find all")
         products = Product.all()
 
     results = [product.serialize() for product in products]
@@ -126,12 +126,14 @@ def list_products():
 # R E A D   A   P R O D U C T
 ######################################################################
 
+
 @app.route("/products/<product_id>", methods=["GET"])
 def get_product(product_id):
     """
     Retrieve a single Product
     This endpoint will return a Product based on it's id
     """
+
     app.logger.info(f"Request to Retrieve a product with id: {product_id}")
 
     product = Product.find(product_id)
@@ -168,10 +170,10 @@ def update_product(product_id):
     product.deserialize(data)
     product.id = product_id
     product.update()
-    
+
     app.logger.info(f"Returning updated product: {product.name}")
     return jsonify(product.serialize()), status.HTTP_200_OK
-    
+
 
 ######################################################################
 # D E L E T E   A   P R O D U C T
@@ -190,7 +192,7 @@ def delete_product(product_id):
         app.logger.error(f"Product with id: {product_id} doesn't exist.")
         abort(status.HTTP_404_NOT_FOUND,
               description=f"Product with id: {product_id} doesn't exist.")
-    
+
     product.delete()
     app.logger.info(f"Deleted product: {product.name}")
 

@@ -38,7 +38,7 @@ def step_impl(context):
     """ Make a call to the base URL """
     context.driver.get(context.base_url)
     # Uncomment next line to take a screenshot of the web page
-    # context.driver.save_screenshot('home_page.png')
+    context.driver.save_screenshot('home_page.png')
 
 @then('I should see "{message}" in the title')
 def step_impl(context, message):
@@ -104,7 +104,21 @@ def step_impl(context, element_name):
 # to get the element id of any button
 ##################################################################
 
-## UPDATE CODE HERE ##
+@when('I press the "{element_name}" button')
+def step_impl(context, element_name):
+    element_id = f"{element_name.lower()}-btn"
+    element = WebDriverWait(context.driver, context.wait_seconds).until(
+        expected_conditions.presence_of_element_located((By.ID, element_id))
+    )
+    element.click()
+
+@then('I should see the message "{message_text}"')
+def step_impl(context, message_text):
+    message_id = "flash_message"
+    message = WebDriverWait(context.driver, context.wait_seconds).until(
+        expected_conditions.presence_of_element_located((By.ID, message_id))
+    )
+    assert(message.text == message_text)
 
 ##################################################################
 # This code works because of the following naming convention:
