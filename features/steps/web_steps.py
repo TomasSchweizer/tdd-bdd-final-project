@@ -113,8 +113,6 @@ def step_impl(context, element_name):
     assert(found)
     context.driver.find_element_by_id(element_id).click()
 
-
-
 @then('I should see the message "{message_text}"')
 def step_impl(context, message_text):
     message_id = "flash_message"
